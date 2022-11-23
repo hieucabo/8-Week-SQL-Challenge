@@ -10,6 +10,9 @@
 - [Entity Relationship Diagram](#entity-relationship-diagram)
 - [Case Study Questions](#case-study-questions)
 ***
+## **What I learned?** 📖 
+
+- How to use **WITH AS** to create a temp table.
 
 ## **Introduction**
 
