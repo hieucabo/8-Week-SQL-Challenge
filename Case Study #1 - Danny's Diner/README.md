@@ -5,12 +5,13 @@
 </p>
 
 ## 📘 Table of Contents
+- [What I Learned?](#what-i-learned?)
 - [Introduction](#introduction)
 - [Problem Statement](#problem-statement)
 - [Entity Relationship Diagram](#entity-relationship-diagram)
 - [Case Study Questions](#case-study-questions)
 ***
-## **What I learned?** 📖 
+## **What I Learned?** 📖 
 
 - How to use **WITH AS** to create a temp table.
 
