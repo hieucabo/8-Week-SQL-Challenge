@@ -4,18 +4,17 @@
   <img width="400" height="400" src="https://8weeksqlchallenge.com/images/case-study-designs/1.png">
 </p>
 
+## **What I Learned?** 
+
+- How to use **WITH AS** to create a temp table.
+
 ## 📘 Table of Contents
-- [What I Learned?](#what-i-learned?)
 - [Introduction](#introduction)
 - [Problem Statement](#problem-statement)
 - [Entity Relationship Diagram](#entity-relationship-diagram)
 - [Case Study Questions](#case-study-questions)
 
 ***
-
-## **What I Learned?** 
-
-- How to use **WITH AS** to create a temp table.
 
 ## **Introduction**
 
