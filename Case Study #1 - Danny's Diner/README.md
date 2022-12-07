@@ -7,7 +7,7 @@
 ## **What I Learned?** 
 
 - How to use **WITH AS** to create a temp table.
-
+- How to use **RANK**, **DENSE_RANK**, **OVER()** AND **PARTITION BY**.
 ## 📘 Table of Contents
 - [Introduction](#introduction)
 - [Problem Statement](#problem-statement)
