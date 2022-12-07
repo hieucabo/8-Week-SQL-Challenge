@@ -146,9 +146,126 @@ GROUP BY sales.customer_id, menu.product_name)
 
 ### 6. Which item was purchased first by the customer after they became a member?
 
+````sql
+WITH rank_table AS(
+    SELECT
+        sales.customer_id,
+        sales.order_date,
+        members.join_date,
+        DENSE_RANK() OVER(
+            PARTITION BY sales.customer_id
+            ORDER BY sales.order_date
+            ) AS rank
+    FROM sales
+    INNER JOIN members
+    ON sales.customer_id = members.customer_id
+    WHERE sales.order_date >= members.join_date
+)
+        SELECT DISTINCT
+            sales.customer_id,
+            menu.product_name
+        FROM sales
+        INNER JOIN menu
+        ON menu.product_id = sales.product_id
+        INNER JOIN rank_table
+        ON sales.customer_id = rank_table.customer_id
+        AND sales.order_date = rank_table.order_date
+        WHERE rank_table.rank = 1;
+````
+
+- Create a temp table ````rank_table```` using **WITH AS** function.
+- **INNER JOIN** ````sales```` and ````members````.
+- Use **WHERE** to only filtered ````order_date```` after or equal to ````join_date````.
+- Use **DENSE_RANK**, **OVER** and **PARTITION BY** to rank the least recently purchased by each customer after they became a member.
+- **SELECT** only the ````customer_id```` and ````product_name```` **WHERE** ````rank```` = 1.
+
+| customer_id | product_name |
+|-------------|--------------|
+| A           | curry        |
+| B           | sushi        |
+
+- Customer A and B first purchased product is curry and sushi, respectively. 
+- Customer C did not become a member so there is no record for customer C.
+
 ### 7. Which item was purchased just before the customer became a member?
 
+````sql
+WITH rank_table AS(
+    SELECT
+        sales.customer_id,
+        sales.order_date,
+        DENSE_RANK() OVER(
+            PARTITION BY sales.customer_id
+            ORDER BY order_date DESC
+        ) AS rank
+    FROM sales
+    INNER JOIN members
+    ON members.customer_id = sales.customer_id
+    WHERE sales.order_date < members.join_date
+)
+    SELECT DISTINCT
+        r1.customer_id,
+        r2.product_name,
+        r1.order_date
+    FROM sales AS r1
+    INNER JOIN menu AS r2
+    ON r1.product_id = r2.product_id
+    INNER JOIN rank_table AS r3
+    ON r1.customer_id = r3.customer_id
+    AND r1.order_date = r3.order_date
+    WHERE r3.rank = 1;
+````
+
+- The solution is similar to question 6, except only filtering ````order_date```` before ````join_date````.
+- I also listed out the date of the order for a clearer solution.
+
+| customer_id | product_name | order_date |
+|-------------|--------------|------------|
+| A           | curry        | 2021-01-01 |
+| A           | sushi        | 2021-01-01 |
+| B           | sushi        | 2021-01-04 |
+
+- Before becoming a member, customer A had purchased curry and sushi on the same day.
+- Customer B had purchased sushi before becoming a member.
+
 ### 8. What is the total items and amount spent for each member before they became a member?
+
+````sql
+WITH cte AS(
+    SELECT
+        sales.customer_id,
+        sales.order_date,
+        sales.product_id,
+        menu.price,
+        members.join_date
+    FROM sales
+    INNER JOIN members
+    ON sales.customer_id = members.customer_id
+    INNER JOIN menu
+    ON sales.product_id = menu.product_id
+    WHERE sales.order_date < members.join_date
+)
+    SELECT
+        customer_id,
+        COUNT(*) AS total_items,
+        SUM(price) AS total_spent
+    FROM cte
+    GROUP BY customer_id;
+````
+- Create a temp table ````cte```` using **WITH AS** function.
+- **INNER JOIN** ````sales```` and ````menu````.
+- Filter only the ````product_id```` which has ````order_date```` before ````join_date```` using **WHERE**.
+- Use **COUNT**, **SUM** and **GROUP BY** to find the ````price```` to find the total items and amount spent for each ````customer_id````.
+
+| customer_id | total_items | total_spent |
+|-------------|-------------|-------------|
+| A           | 2           | 25          |
+| B           | 3           | 40          |
+
+- Customer A bought 2 items and spent a total of 25$.
+- Customer B bought 3 items and spent a total of 40$.
+- Customer C did not become a member so there is no record.
+
 
 ### 9. If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
 
