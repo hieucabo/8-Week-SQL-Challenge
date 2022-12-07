@@ -106,6 +106,44 @@ ORDER BY count_times DESC;
 
 ### 5. Which item was the most popular for each customer?
 
+````sql
+WITH rank_table AS(
+SELECT
+    sales.customer_id,
+    menu.product_name,
+    COUNT(sales.product_id) as num_purchased,
+    DENSE_RANK()
+    OVER (PARTITION BY customer_id ORDER BY COUNT(sales.product_id) DESC) AS rank
+FROM sales
+INNER JOIN menu
+ON menu.product_id = sales.product_id
+GROUP BY sales.customer_id, menu.product_name)
+    SELECT
+    customer_id,
+    product_name,
+    num_purchased
+    FROM rank_table
+    WHERE rank = 1;
+````
+
+- Create a temp table ````rank_table```` using **WITH AS** function.
+- **INNER JOIN** ````sales```` and ````menu````.
+- Use **COUNT** and **GROUP BY** ````customer_id```` and ````product_name```` to know how many times each product was purchased by each customer.
+- Use **DENSE_RANK**, **OVER** and **PARTITION BY** to rank the product with the most purchased first by each customer.
+- **SELECT** only the ````customer_id```` and ````product_name```` **WHERE** ````rank```` = 1.
+
+| customer_id | product_name | num_purchased |
+|-------------|--------------|---------------|
+| A           | ramen        | 3             |
+| B           | sushi        | 2             |
+| B           | curry        | 2             |
+| B           | ramen        | 2             |
+| C           | ramen        | 3             |
+
+- Ramen is the most purchased by customer A.
+- Customer B bought 3 products at the same time. 
+- Customer C favourite product is ramen which was purchased 3 times.
+
 ### 6. Which item was purchased first by the customer after they became a member?
 
 ### 7. Which item was purchased just before the customer became a member?
