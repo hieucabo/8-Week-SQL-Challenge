@@ -269,4 +269,190 @@ WITH cte AS(
 
 ### 9. If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
 
+````sql 
+WITH cte AS(
+    SELECT
+        t1.customer_id,
+        t2.product_name,
+        t2.price,
+        CASE WHEN product_name = 'sushi' THEN 20
+        ELSE 10 END AS point
+    FROM sales AS t1
+    INNER JOIN menu AS t2
+    ON t1.product_id = t2.product_id
+)
+    SELECT
+        customer_id,
+        SUM(point*price) AS total_point
+    FROM cte
+    GROUP BY customer_id;
+````
+- Create a temp table ````cte```` using **WITH AS** function. 
+- **INNER JOIN** ````sales```` and ````menu````.
+- Use **CASE WHEN ... ELSE ... END** to set the point for each item, ```sushi```` has 20 points. 
+- **GROUP BY** ````customer_id```` and use **SUM** to find the total points by each customer.
+
+| customer_id | total_point |
+|-------------|-------------|
+| A           | 860         |
+| B           | 940         |
+| C           | 360         |
+
+- Customer A earned 860 points.
+- Customer B had the highest points, which are 940.
+- Customer C got only 360 points.
+
 ### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+
+````sql
+WITH cte AS(
+    SELECT
+        sales.customer_id,
+        sales.order_date,
+        sales.product_id,
+        menu.product_name,
+        menu.price,
+        members.join_date,
+        DATEADD(d,6,members.join_date) AS bonus_date
+    FROM sales
+    INNER JOIN menu
+    ON sales.product_id = menu.product_id
+    INNER JOIN members
+    ON sales.customer_id = members.customer_id
+    WHERE sales.order_date >= members.join_date
+),
+cte2 AS(
+    SELECT
+    customer_id,
+    price,
+    order_date,
+    bonus_date,
+    product_name,
+    CASE
+    WHEN order_date <= bonus_date THEN 20
+    WHEN order_date > bonus_date AND product_name = 'sushi' THEN 20
+    ELSE 10 END AS point
+    FROM cte
+)
+SELECT
+    customer_id,
+    SUM(point * price) AS total_point
+FROM cte2
+WHERE order_date < '2021-01-31'
+GROUP BY customer_id
+````
+- Create 2 temp tables ````cte```` and ````cte2```` using **WITH AS** function. 
+- On the ````cte````, use **INNER JOIN** ````sales```` and ````menu````, then use **DATEADD** to get the last bonus day. Get only the sales information after the customer joined as a member.
+- On the ````cte2````, use **CASE WHEN** to specify the point in each case. 
+- **GROUP BY** ````customer_id```` and use **SUM** to find the total points by each customer, only take the information in January.
+
+| customer_id | total_point |
+|-------------|-------------|
+| A           | 1020        |
+| B           | 320         |
+
+-  Customer A had 1020 points, while customer B only got 320. This is because half of the items of customer B were purchased before joining as a member, and an item was purchased in February.
+
+***
+
+## Bonus Questions
+
+### Join All The Things
+
+The following questions are related creating basic data tables that Danny and his team can use to quickly derive insights without needing to join the underlying tables using SQL.
+
+| customer_id | order_date | product_name | price | member |
+|-------------|------------|--------------|-------|--------|
+| A           | 2021-01-01 | curry        | 15    | N      |
+| A           | 2021-01-01 | sushi        | 10    | N      |
+| A           | 2021-01-07 | curry        | 15    | Y      |
+| A           | 2021-01-10 | ramen        | 12    | Y      |
+| A           | 2021-01-11 | ramen        | 12    | Y      |
+| A           | 2021-01-11 | ramen        | 12    | Y      |
+| B           | 2021-01-01 | curry        | 15    | N      |
+| B           | 2021-01-02 | curry        | 15    | N      |
+| B           | 2021-01-04 | sushi        | 10    | N      |
+| B           | 2021-01-11 | sushi        | 10    | Y      |
+| B           | 2021-01-16 | ramen        | 12    | Y      |
+| B           | 2021-02-01 | ramen        | 12    | Y      |
+| C           | 2021-01-01 | ramen        | 12    | N      |
+| C           | 2021-01-01 | ramen        | 12    | N      |
+| C           | 2021-01-07 | ramen        | 12    | N      |
+
+````sql
+SELECT
+    sales.customer_id,
+    sales.order_date,
+    menu.product_name,
+    menu.price,
+    CASE
+    WHEN sales.order_date >= members.join_date THEN 'Y'
+    ELSE 'N' END AS member
+FROM sales
+INNER JOIN menu
+ON sales.product_id = menu.product_id
+LEFT JOIN members
+ON sales.customer_id = members.customer_id
+ORDER BY customer_id, order_date, product_name
+````
+
+- **INNER JOIN** ````sales```` and ````menu```` to get the item name and the price.
+- **LEFT JOIN** ````sales```` and ````members```` to get the join date of each customer, because customer C did not join as a member, so we can not use **INNER JOIN**.
+- Use **CASE WHEN** to set the member status for each sale information.
+
+***
+
+### Rank All The Things
+
+Danny also requires further information about the ranking of customer products, but he purposely does not need the ranking for non-member purchases so he expects null ranking values for the records when customers are not yet part of the loyalty program.
+
+| customer_id | order_date | product_name | price | member | ranking |
+|-------------|------------|--------------|-------|--------|---------|
+| A           | 2021-01-01 | curry        | 15    | N      | null    |
+| A           | 2021-01-01 | sushi        | 10    | N      | null    |
+| A           | 2021-01-07 | curry        | 15    | Y      | 1       |
+| A           | 2021-01-10 | ramen        | 12    | Y      | 2       |
+| A           | 2021-01-11 | ramen        | 12    | Y      | 3       |
+| A           | 2021-01-11 | ramen        | 12    | Y      | 3       |
+| B           | 2021-01-01 | curry        | 15    | N      | null    |
+| B           | 2021-01-02 | curry        | 15    | N      | null    |
+| B           | 2021-01-04 | sushi        | 10    | N      | null    |
+| B           | 2021-01-11 | sushi        | 10    | Y      | 1       |
+| B           | 2021-01-16 | ramen        | 12    | Y      | 2       |
+| B           | 2021-02-01 | ramen        | 12    | Y      | 3       |
+| C           | 2021-01-01 | ramen        | 12    | N      | null    |
+| C           | 2021-01-01 | ramen        | 12    | N      | null    |
+| C           | 2021-01-07 | ramen        | 12    | N      | null    |
+
+````sql
+WITH cte AS(
+    SELECT
+    sales.customer_id,
+    sales.order_date,
+    menu.product_name,
+    menu.price,
+    CASE
+    WHEN sales.order_date >= members.join_date THEN 'Y'
+    ELSE 'N' END AS member
+FROM sales
+INNER JOIN menu
+ON sales.product_id = menu.product_id
+LEFT JOIN members
+ON sales.customer_id = members.customer_id
+)
+SELECT
+    *,
+    CASE
+    WHEN member = 'N' THEN NULL
+    ELSE DENSE_RANK() OVER(
+    PARTITION BY customer_id,member
+    ORDER BY order_date
+    )
+    END AS rank
+FROM cte
+````
+
+- The first step is the same as the last problem **Join All The Things**.
+- Use **CASE WHEN** to check the member status.
+- **DENSE_RANK()** and **OVER()** to rank the sales for each customer after becoming a member.
+- Must use **PARTITION BY** by both ````customer_id```` and ````member```` because if set only by ````customer_id```` it will rank including when the customer had not become a member.
