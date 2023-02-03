@@ -39,6 +39,8 @@ Danny has prepared for us an entity relationship diagram of his database design 
 
 ### A. Pizza Metrics
 
+View my solution [here](https://github.com/hieucabo/8-Week-SQL-Challenge/blob/f540bd0dd67fd0ac71e2f175f39eca19d1b5a60a/Case%20Study%20%232%20-%20Pizza%20Runner/A.%20Pizza%20Metrics.md).
+
 1. How many pizzas were ordered?
 
 2. How many unique customer orders were made?
