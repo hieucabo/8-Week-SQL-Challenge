@@ -1,4 +1,4 @@
-# 🍜 Case Study #1: Danny's Diner 
+# 🍕 Case Study #2 - Pizza Runner
 
 <p align="center">
   <img width="400" height="400" src="https://user-images.githubusercontent.com/115451301/216535253-501fbd3a-a0a9-4296-abca-ea4907addd27.png">
