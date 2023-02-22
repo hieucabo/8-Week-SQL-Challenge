@@ -6,7 +6,9 @@
 
 ## **What I Learned?** 
 
-
+- Dealing with hard question, which needed to divive the problem into details.
+- Using **LEAD** and **PARTITION BY** to get the next value of customer plan.
+- Dealing with day and month problems. 
 
 ## 📘 Table of Contents
 - [Introduction](#introduction)
