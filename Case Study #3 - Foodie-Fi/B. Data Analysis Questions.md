@@ -1,6 +1,6 @@
 # 🍌 Case Study #3 - Foodie-Fi 
 
-### B. Data Analysis Questions.md
+### B. Data Analysis Questions
 
 ***
 
