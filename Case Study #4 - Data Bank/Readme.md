@@ -1,4 +1,4 @@
-# 🍌 Case Study #4 - Data Bank  
+# 🏦 Case Study #4 - Data Bank  
 
 <p align="center">
   <img width="400" height="400" src="https://user-images.githubusercontent.com/115451301/220572080-6b9ef197-2196-4493-9e1e-bbabddb9e5b5.png">
